@@ -1,5 +1,7 @@
 # JSON Converter
 
+[![Build Status](https://travis-ci.org/jbelmont/json-converter.svg?branch=master)](https://travis-ci.org/jbelmont/json-converter)
+
 A micro go library to convert tsv and csv files to json format
 
 ## Help

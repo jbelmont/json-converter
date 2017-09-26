@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/csv"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -30,6 +31,8 @@ func (r *FieldsReader) Read() (record []string, err error) {
 }
 
 func main() {
+	rows := make([]map[string]string, 0)
+	var columns = []string{"name", "email", "phone"}
 	csvPtr := flag.String("csv-file", "", "CSV File to parse. (Required)")
 	tsvPtr := flag.String("tsv-file", "", "CSV File to parse. (Required)")
 	flag.Parse()
@@ -44,22 +47,27 @@ func main() {
 		}
 		defer f.Close()
 		// Create a new reader.
-		r := csv.NewReader(bufio.NewReader(f))
+		csvReader := csv.NewReader(bufio.NewReader(f))
+		csvReader.TrimLeadingSpace = true
 		for {
-			record, err := r.Read()
-			// Stop at EOF.
+			record, err := csvReader.Read()
 			if err == io.EOF {
 				break
 			}
-			// Display record.
-			// ... Display record length.
-			// ... Display all individual elements of the slice.
-			fmt.Println(record)
-			fmt.Println(len(record))
-			for value := range record {
-				fmt.Printf("  %v\n", record[value])
+			if err != nil {
+				fmt.Println(err)
 			}
+			row := make(map[string]string)
+			for i, n := range columns {
+				row[n] = record[i]
+			}
+			rows = append(rows, row)
 		}
+		data, err := json.MarshalIndent(&rows, "", "  ")
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(data)
 	} else {
 		f, err := os.Open(*tsvPtr)
 		if err != nil {
